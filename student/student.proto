@@ -1,0 +1,20 @@
+//Set Syntax Proto
+syntax = "proto3";
+
+//Set package
+option go_package = "github.com/asnur/go-grpc-learn/student";
+
+package student;
+
+// Create a Service Data Student use Method FindStudentByEmail with the paramater on the message and return message value
+
+service DataStudent{
+    rpc FindStudentByEmail(Student) returns (Student);
+}
+
+// This is the message for the Student
+message Student{
+    string name = 1;
+    string email = 2;
+    int32 age = 3;
+}
