@@ -9,6 +9,7 @@ import (
 	pb "github.com/asnur/go-grpc-learn/student"
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func getDataStudent(client pb.DataStudentClient, email string) {
@@ -34,10 +35,10 @@ func getDataStudent(client pb.DataStudentClient, email string) {
 
 }
 
-func DialServer() grpc.ClientConnInterface {
+func DialServer() *grpc.ClientConn {
 	var opt []grpc.DialOption
 
-	opt = append(opt, grpc.WithInsecure())
+	opt = append(opt, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	opt = append(opt, grpc.WithBlock())
 
 	conn, err := grpc.Dial("localhost:5000", opt...)
@@ -50,6 +51,8 @@ func DialServer() grpc.ClientConnInterface {
 
 func TestDial(t *testing.T) {
 	conn := DialServer()
+
+	defer conn.Close()
 
 	client := pb.NewDataStudentClient(conn)
 	getDataStudent(client, "")
