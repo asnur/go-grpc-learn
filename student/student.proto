@@ -6,11 +6,16 @@ option go_package = "github.com/asnur/go-grpc-learn/student";
 
 package student;
 
+//Empty Proto for Return nil
+import "google/protobuf/Empty.proto";
+
 // Create a Service Data Student use Method FindStudentByEmail with the paramater on the message and return message value
 
 service DataStudent{
     rpc FindStudentByEmail(Student) returns (Student);
+    rpc FindAllStudent(google.protobuf.Empty) returns (StudentList) {};
 }
+
 
 // This is the message for the Student
 message Student{
@@ -18,3 +23,7 @@ message Student{
     string email = 2;
     int32 age = 3;
 }
+
+message StudentList{
+    repeated Student Students = 1;
+} 

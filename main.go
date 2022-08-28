@@ -8,6 +8,7 @@ import (
 	"os"
 
 	pb "github.com/asnur/go-grpc-learn/student"
+	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -15,7 +16,8 @@ import (
 
 type dataStudentServer struct {
 	pb.UnimplementedDataStudentServer
-	students []*pb.Student
+	students    []*pb.Student
+	studentlist *pb.StudentList
 }
 
 func (s *dataStudentServer) FindStudentByEmail(ctx context.Context, in *pb.Student) (*pb.Student, error) {
@@ -25,6 +27,10 @@ func (s *dataStudentServer) FindStudentByEmail(ctx context.Context, in *pb.Stude
 		}
 	}
 	return nil, status.Errorf(codes.NotFound, "student with email %s not found", in.Email)
+}
+
+func (s *dataStudentServer) FindAllStudent(context.Context, *empty.Empty) (*pb.StudentList, error) {
+	return s.studentlist, nil
 }
 
 func (s *dataStudentServer) loadData() {
@@ -37,6 +43,8 @@ func (s *dataStudentServer) loadData() {
 	if err != nil {
 		log.Println(err)
 	}
+
+	s.studentlist = &pb.StudentList{Students: s.students}
 
 }
 

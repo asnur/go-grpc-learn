@@ -7,6 +7,7 @@ import (
 	"time"
 
 	pb "github.com/asnur/go-grpc-learn/student"
+	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 )
 
@@ -14,19 +15,26 @@ func getDataStudent(client pb.DataStudentClient, email string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	student := &pb.Student{
-		Email: email,
+	if email == "" {
+		resp, err := client.FindAllStudent(ctx, new(empty.Empty))
+		if err != nil {
+			log.Fatalf("could not find student: %v", err)
+		}
+		log.Printf("AllStudent: %v", resp)
+	} else {
+		student := &pb.Student{
+			Email: email,
+		}
+		resp, err := client.FindStudentByEmail(ctx, student)
+		if err != nil {
+			log.Fatalf("could not find student with email %s: %v", email, err)
+		}
+		log.Printf("student: %s", resp.Name)
 	}
 
-	resp, err := client.FindStudentByEmail(ctx, student)
-	if err != nil {
-		log.Fatalf("could not find student with email %s: %v", email, err)
-	}
-
-	log.Printf("student: %s", resp.Name)
 }
 
-func TestDial(t *testing.T) {
+func DialServer() grpc.ClientConnInterface {
 	var opt []grpc.DialOption
 
 	opt = append(opt, grpc.WithInsecure())
@@ -34,10 +42,15 @@ func TestDial(t *testing.T) {
 
 	conn, err := grpc.Dial("localhost:5000", opt...)
 	if err != nil {
-		t.Fatalf("did not connect: %v", err)
+		log.Fatalf("could not connect: %v", err)
 	}
-	defer conn.Close()
+
+	return conn
+}
+
+func TestDial(t *testing.T) {
+	conn := DialServer()
 
 	client := pb.NewDataStudentClient(conn)
-	getDataStudent(client, "asnurramdhani12@gmail.com")
+	getDataStudent(client, "")
 }
